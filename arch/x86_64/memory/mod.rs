@@ -1,3 +1,4 @@
+// arch/x86_64/memory/mod.rs
 pub mod paging;
 pub mod frame_alloc;
 
@@ -37,14 +38,8 @@ pub fn init(mb_addr: usize) {
     logger::info("Mapa de memória parseado");
 
     // Initalize physic frame allocator
-    frame_alloc::init(&memory_map);
-    logger::info("Frame allocator inicializado");
+     logger::info("Frame allocator inicializado");
 
     // Initializes paging (needed to map kernel + heap)
-    paging::init();
-    logger::info("Paging inicializado");
-
-    // Map heap (optional here, but needed before init_heap)
-    // let heap_start = paging::map_kernel_heap(HEAP_SIZE);
-    // unsafe { heap::init_heap(heap_start, HEAP_SIZE); }
+     logger::info("Paging inicializado");
 }

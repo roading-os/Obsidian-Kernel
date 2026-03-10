@@ -1,3 +1,6 @@
+// src/main.rs
+/* don't worry, inside src/ have symlinks of arch/, drivers/, include/,
+kernel/ and memory/ */
 #![no_std]
 #![no_main]
 #![feature(abi_x86_interrupt)]

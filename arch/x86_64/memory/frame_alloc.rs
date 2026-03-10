@@ -1,3 +1,4 @@
+// arch/x86_64/memory/frame_alloc.rs
 use core::sync::atomic::{AtomicUsize, Ordering};
 use crate::memory::map::MemoryRegionType;
 use crate::memory::map::MemoryMap;
@@ -42,6 +43,7 @@ pub fn init(memory_map: &MemoryMap) {
 
     // 2️⃣ Libera apenas regiões Usable
     for region in memory_map.regions {
+        reserve_region(0x0, 0x200000)
         if region.region_type != MemoryRegionType::Usable {
             continue;
         }

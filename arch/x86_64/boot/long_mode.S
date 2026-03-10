@@ -1,3 +1,4 @@
+# arch/x86_64/boot/long_mode.S
 .global long_mode_start
 .extern kernel_main_64
 

@@ -1,3 +1,4 @@
+// drivers/video/mod.rs
 pub trait VideoDevice {
     fn clear(&self, color: u32);
     fn put_pixel(&self, x: u32, y: u32, color: u32);

@@ -1,3 +1,4 @@
+# arch/x86_64/boot/multiboot.S
 /*-------------------------------------------------------
  Multiboot2 + x86_64 entry stub
  Compatible with modular Obsidian Kernel (framebuffer, keyboard, serial)
@@ -93,8 +94,8 @@ stack_top:
 .global bss_end
 
 bss_start:
-    /* Aqui começa o BSS real do kernel, sem redefinir . */
-    . = .   /* Nenhum efeito, só garante que o símbolo existe */
+    # Here starts the real BSS of kernel, without resetting
+    . = .  # Not effect, just guarantee that symbol exists
 
 bss_end:
-    /* Aqui termina o BSS */
+    # Here ends BSS

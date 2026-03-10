@@ -1,3 +1,4 @@
+// arch/x86_64/memory/paging.rs
 use crate::arch::x86_64::memory::frame_alloc;
 use core::arch::asm;
 
@@ -20,7 +21,7 @@ pub fn init() {
         // Higher half kernel
         map_range(0xffffffff80000000, 0x100000, 16 * 1024 * 1024, PRESENT | WRITABLE);
 
-        // Ativa paging
+        // Enable paging
         enable_paging(PML4);
     }
 }
@@ -47,11 +48,37 @@ unsafe fn map_range(virt_start: u64, phys_start: u64, size: u64, flags: u64) {
 }
 
 // Mapear página única (4KiB)
-unsafe fn map_page(virt_addr: u64, phys_addr: u64, flags: u64) {
-    // Simplificação: PML4, PDPT, PD, PT alocados na hora
-    // Para cada nível, criar se necessário
-    // Código completo de paging x86_64 é longo, mas aqui é early boot safe
-    unimplemented!("map_page deve criar entradas PT e setar flags")
+unsafe fn map_page(virt: u64, phys: u64, flags: u64) {
+    let pml4 = PML4;
+
+    let pml4_i = ((virt >> 39) & 0x1FF) as usize;
+    let pdpt_i = ((virt >> 30) & 0x1FF) as usize;
+    let pd_i   = ((virt >> 21) & 0x1FF) as usize;
+    let pt_i   = ((virt >> 12) & 0x1FF) as usize;
+
+    let pdpt = get_or_create(pml4, pml4_i);
+    let pd   = get_or_create(pdpt, pdpt_i);
+    let pt   = get_or_create(pd, pd_i);
+
+    *pt.add(pt_i) = phys | flags | PRESENT;
+}
+
+unsafe fn get_or_create(table: *mut u64, index: usize) -> *mut u64 {
+    let entry = table.add(index);
+
+    if *entry & PRESENT == 0 {
+        let frame = frame_alloc::alloc_frame().unwrap();
+        let new_table = frame as *mut u64;
+
+        for i in 0..ENTRY_COUNT {
+            *new_table.add(i) = 0;
+        }
+
+        *entry = frame | PRESENT | WRITABLE;
+        new_table
+    } else {
+        (*entry & 0x000fffff_fffff000) as *mut u64
+    }
 }
 
 // Ativar paging (CR3)
@@ -68,7 +95,11 @@ pub fn map_kernel_heap(size: usize) -> usize {
     const HEAP_START: u64 = 0xffff_ffff_9000_0000;
 
     unsafe {
-        map_range(HEAP_START, frame_alloc::alloc_frame().unwrap(), size as u64, PRESENT | WRITABLE);
+      for offset in (0..size).step_by(PAGE_SIZE) {
+         let frame = frame_alloc::alloc_frame().unwrap();
+         map_page(HEAP_START + offset, frame, flags);
+      }
+        
     }
 
     HEAP_START as usize

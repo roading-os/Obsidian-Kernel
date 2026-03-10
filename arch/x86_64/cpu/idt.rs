@@ -1,3 +1,4 @@
+// arch/x86_64/cpu/idt.rs
 #![allow(dead_code)]
 #![feature(abi_x86_interrupt)]
 
@@ -93,6 +94,8 @@ pub fn init() {
         IDT[0].set_handler(divide_by_zero); // #DE Divide-by-zero
         IDT[3].set_handler(breakpoint);     // #BP Breakpoint
 
+        IDT[32].set_handler(timer_interrupt); // PIT
+
         // Syscall interrupt
         IDT[0x80].set_handler(syscall_handler); // interrupt 0x80 for syscalls
 
@@ -104,5 +107,15 @@ pub fn init() {
 
         asm!("lidt [{}]", in(reg) &idt_ptr);
         asm!("sti"); // enable CPU interrupts
+    }
+}
+
+extern "x86-interrupt" fn timer_interrupt(_stack: InterruptStackFrame) {
+    crate::tasks::scheduler::schedule();
+
+    unsafe {
+        use x86_64::instructions::port::Port;
+        let mut pic = Port::<u8>::new(0x20);
+        pic.write(0x20); // EOI
     }
 }

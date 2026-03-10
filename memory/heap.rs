@@ -1,8 +1,8 @@
+// memory/heap.rs
+use core::alloc::{GlobalAlloc, Layout};
+
 #![feature(alloc_error_handler)]
 
-// memory/heap.rs
-
-use core::alloc::{GlobalAlloc, Layout};
 use core::ptr::null_mut;
 use linked_list_allocator::LockedHeap;
 

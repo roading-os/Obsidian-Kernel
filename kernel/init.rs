@@ -1,15 +1,27 @@
+// kernel/init.rs
 use crate::drivers::serial;
+use crate::drivers::timer::pit;
 use crate::kernel::logger;
 use crate::memory;
+use crate::tasks;
+use crate::arch;
 use core::sync::atomic::Ordering;
-use crate::kernel::state::PROGRAM_RUNNING;
 
 pub fn init(mb_addr: usize) -> ! {
+    
     serial::init();
     logger::init();
 
-    logger::info("Obsidian Kernel v0.0.3-pre-alpha");
+    logger::info("Obsidian Kernel");
     logger::info("Entering 64-bit long mode");
+     
+    arch::init(mb_addr);
+
+    arch::x86_64::cpu::init();
+
+    pit::init();
+
+    tasks::init();
 
     memory::init(mb_addr);
 

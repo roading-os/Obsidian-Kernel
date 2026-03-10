@@ -1,3 +1,4 @@
+// kernel/panic.rs
 use core::panic::PanicInfo;
 use crate::drivers::serial;
 

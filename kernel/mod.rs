@@ -1,3 +1,4 @@
+// kernel/mod.rs
 pub mod init;
 pub mod logger;
 pub mod panic;

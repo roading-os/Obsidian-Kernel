@@ -1,3 +1,4 @@
+// kernel/logger.rs
 use crate::drivers::serial;
 
 pub fn init() {}

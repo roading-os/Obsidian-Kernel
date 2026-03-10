@@ -1,3 +1,4 @@
+// arch/x86_64/cpu/gdt.rs
 use core::arch::asm;
 
 #[repr(C, packed)]

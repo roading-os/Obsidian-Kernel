@@ -1,3 +1,4 @@
+// memory/map.rs
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum MemoryRegionType {
     Usable,
