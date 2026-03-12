@@ -34,16 +34,15 @@ impl IdtEntry {
     }
 
     /// Set the handler function for this IDT entry
-    fn set_handler(&mut self, handler: extern "x86-interrupt" fn(InterruptStackFrame)) {
-        let addr = handler as u64;
-        self.offset_low = addr as u16;
-        self.offset_mid = (addr >> 16) as u16;
-        self.offset_high = (addr >> 32) as u32;
-        self.selector = 0x08; // kernel code segment
-        self.ist = 0;         // Interrupt Stack Table entry (0 = default)
-        self.type_attr = 0x8E; // present, interrupt gate, ring 0
-        self.zero = 0;
-    }
+    fn set_handler_addr(&mut self, addr: u64) {
+    self.offset_low = addr as u16;
+    self.offset_mid = (addr >> 16) as u16;
+    self.offset_high = (addr >> 32) as u32;
+    self.selector = 0x08;
+    self.ist = 0;
+    self.type_attr = 0x8E;
+    self.zero = 0;
+   }
 }
 
 #[repr(C, packed)]
@@ -97,7 +96,7 @@ pub fn init() {
         IDT[32].set_handler(timer_interrupt); // PIT
 
         // Syscall interrupt
-        IDT[0x80].set_handler(syscall_handler); // interrupt 0x80 for syscalls
+        IDT[0x80].set_handler_addr(syscall_entry as u64); // interrupt 0x80 for syscalls
 
         // Load IDT
         let idt_ptr = IdtPointer {
@@ -118,4 +117,8 @@ extern "x86-interrupt" fn timer_interrupt(_stack: InterruptStackFrame) {
         let mut pic = Port::<u8>::new(0x20);
         pic.write(0x20); // EOI
     }
+}
+
+extern "C" {
+    fn syscall_entry();
 }

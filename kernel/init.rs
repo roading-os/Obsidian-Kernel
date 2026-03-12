@@ -15,16 +15,14 @@ pub fn init(mb_addr: usize) -> ! {
     logger::info("Obsidian Kernel");
     logger::info("Entering 64-bit long mode");
      
-    arch::init(mb_addr);
+    memory::init(mb_addr);
 
-    arch::x86_64::cpu::init();
+    arch::init(mb_addr);
 
     pit::init();
 
     tasks::init();
-
-    memory::init(mb_addr);
-
+ 
     logger::info("Memory initialized");
     logger::info("Kernel ready");
 

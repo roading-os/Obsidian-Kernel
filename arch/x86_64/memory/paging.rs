@@ -97,7 +97,7 @@ pub fn map_kernel_heap(size: usize) -> usize {
     unsafe {
       for offset in (0..size).step_by(PAGE_SIZE) {
          let frame = frame_alloc::alloc_frame().unwrap();
-         map_page(HEAP_START + offset, frame, flags);
+         map_page(HEAP_START + offset, frame, PRESENT | WRITABLE);
       }
         
     }
