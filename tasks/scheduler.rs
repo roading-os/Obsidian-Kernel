@@ -1,18 +1,28 @@
 // tasks/scheduler.rs
 use crate::tasks::task::{Task, TaskState};
 use crate::drivers::timer::pit;
+use crate::tasks::init::idle_task
 
 extern "C" {
     fn context_switch(old: *mut u64, new: *const u64);
 }
 
-const STACK_SIZE: u64 = 4096 * 4;
+const STACK_SIZE: u64 = 4096;
 
 fn allocate_stack() -> u64 {
     use crate::arch::x86_64::memory::frame_alloc;
 
-    let frame = frame_alloc::alloc_frame().expect("no memory");
-    frame
+    let mut base: u64 = 0;
+
+    for i in 0..4 {
+        let frame = frame_alloc::alloc_frame().expect("no memory");
+
+        if i == 0 {
+            base = frame;
+        }
+    }
+
+    base
 }
 
 static mut TASKS: [Option<Task>; 64] = [None; 64];

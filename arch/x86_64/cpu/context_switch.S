@@ -3,6 +3,7 @@
 
 context_switch:
     
+    push %rip
     push %rbp
     push %rbx
     push %r12
@@ -20,5 +21,6 @@ context_switch:
     pop %r12
     pop %rbx
     pop %rbp
+    pop %rip
 
     ret
