@@ -5,7 +5,6 @@ use crate::kernel::logger;
 use crate::memory;
 use crate::tasks;
 use crate::arch;
-use core::sync::atomic::Ordering;
 
 pub fn init(mb_addr: usize) -> ! {
     
@@ -31,10 +30,6 @@ pub fn init(mb_addr: usize) -> ! {
 
 fn kernel_loop() -> ! {
     loop {
-        if !PROGRAM_RUNNING.load(Ordering::SeqCst) {
-            idle();
-        }
-
         unsafe { core::arch::asm!("hlt"); }
     }
 }

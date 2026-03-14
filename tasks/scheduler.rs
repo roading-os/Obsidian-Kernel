@@ -1,8 +1,18 @@
+// tasks/scheduler.rs
 use crate::tasks::task::{Task, TaskState};
 use crate::drivers::timer::pit;
 
 extern "C" {
     fn context_switch(old: *mut u64, new: *const u64);
+}
+
+const STACK_SIZE: u64 = 4096 * 4;
+
+fn allocate_stack() -> u64 {
+    use crate::arch::x86_64::memory::frame_alloc;
+
+    let frame = frame_alloc::alloc_frame().expect("no memory");
+    frame
 }
 
 static mut TASKS: [Option<Task>; 64] = [None; 64];

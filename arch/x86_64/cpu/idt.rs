@@ -27,7 +27,7 @@ impl IdtEntry {
             selector: 0,
             ist: 0,
             type_attr: 0,
-            offset_mid: 0,
+            offset_mid: 0,>
             offset_high: 0,
             zero: 0,
         }
@@ -90,10 +90,10 @@ extern "x86-interrupt" fn syscall_handler(_stack: InterruptStackFrame) {
 pub fn init() {
     unsafe {
         // CPU exceptions
-        IDT[0].set_handler(divide_by_zero); // #DE Divide-by-zero
-        IDT[3].set_handler(breakpoint);     // #BP Breakpoint
+        IDT[0].set_handler_addr(divide_by_zero); // #DE Divide-by-zero
+        IDT[3].set_handler_addr(breakpoint);     // #BP Breakpoint
 
-        IDT[32].set_handler(timer_interrupt); // PIT
+        IDT[32].set_handler_addr(timer_interrupt); // PIT
 
         // Syscall interrupt
         IDT[0x80].set_handler_addr(syscall_entry as u64); // interrupt 0x80 for syscalls
