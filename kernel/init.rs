@@ -16,7 +16,7 @@ pub fn init(mb_addr: usize) -> ! {
      
     memory::init(mb_addr);
 
-    arch::init(mb_addr);
+    arch::x86_64::cpu::init();
 
     pit::init();
 

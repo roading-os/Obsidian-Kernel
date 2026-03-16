@@ -85,6 +85,7 @@ pub fn schedule() {
         let new_task = TASKS[CURRENT].as_ref().unwrap();
 
         old_task.state = TaskState::Ready;
+        new_task.state = TaskState::Running;
 
         // troca de contexto
         context_switch(

@@ -110,13 +110,14 @@ pub fn init() {
 }
 
 extern "x86-interrupt" fn timer_interrupt(_stack: InterruptStackFrame) {
-    crate::tasks::scheduler::schedule();
-
+    
     unsafe {
         use x86_64::instructions::port::Port;
         let mut pic = Port::<u8>::new(0x20);
         pic.write(0x20); // EOI
     }
+
+    crate::tasks::scheduler::schedule();
 }
 
 extern "C" {

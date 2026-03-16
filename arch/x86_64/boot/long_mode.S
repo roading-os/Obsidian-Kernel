@@ -54,7 +54,7 @@ long_mode_start:
     # Habilitar Long Mode via MSR
     mov $0xC0000080, %ecx
     rdmsr
-    orl $0x100, %eax        # 32-bit
+    orl $0x100, %eax  # 32-bit
     wrmsr
 
     # Ativar paging (CR0.PG)
