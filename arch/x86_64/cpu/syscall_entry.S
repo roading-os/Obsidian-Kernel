@@ -24,6 +24,7 @@ syscall_entry:
     mov %rsp, %rdi
 
     call syscall_dispatch
+    mov %rax, %rax # guarantee
 
     # restore registers
     pop %r15

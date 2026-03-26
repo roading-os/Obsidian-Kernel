@@ -26,6 +26,18 @@ impl GdtDescriptor {
 }
 
 #[repr(C, packed)]
+struct TssDescriptor {
+    limit_low: u16,
+    base_low: u16,
+    base_mid: u8,
+    access: u8,
+    granularity: u8,
+    base_high: u8,
+    base_upper: u32,
+    reserved: u32,
+}
+
+#[repr(C, packed)]
 struct GdtPointer {
     limit: u16,
     base: u64,
@@ -75,5 +87,26 @@ pub fn init() {
             "2:",
             out("rax") _,
         );
+    }
+}
+
+static mut KERNEL_STACK: [u8; 4096 * 4] = [0; 4096 * 4];
+
+fn kernel_stack_top() -> u64 {
+    unsafe {
+        &KERNEL_STACK as *const _ as u64 + (4096 * 4) as u64
+    }
+}
+
+fn create_tss_descriptor(base: u64, limit: u32) -> TssDescriptor {
+    TssDescriptor {
+        limit_low: (limit & 0xFFFF) as u16,
+        base_low: (base & 0xFFFF) as u16,
+        base_mid: ((base >> 16) & 0xFF) as u8,
+        access: 0x89, // present + type TSS
+        granularity: ((limit >> 16) & 0x0F) as u8,
+        base_high: ((base >> 24) & 0xFF) as u8,
+        base_upper: (base >> 32) as u32,
+        reserved: 0,
     }
 }

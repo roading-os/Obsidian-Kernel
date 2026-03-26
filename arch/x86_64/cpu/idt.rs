@@ -34,13 +34,17 @@ impl IdtEntry {
     }
 
     /// Set the handler function for this IDT entry
-    fn set_handler_addr(&mut self, addr: u64) {
+    fn set_handler_addr(&mut self, addr: u64, user_callable: bool) {
     self.offset_low = addr as u16;
     self.offset_mid = (addr >> 16) as u16;
     self.offset_high = (addr >> 32) as u32;
     self.selector = 0x08;
     self.ist = 0;
-    self.type_attr = 0x8E;
+    self.type_attr = if user_callable {
+        0xEE // ring 3
+    } else {
+        0x8E // ring 0
+    };
     self.zero = 0;
    }
 }

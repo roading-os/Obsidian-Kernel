@@ -1,7 +1,8 @@
 // tasks/scheduler.rs
 use crate::tasks::task::{Task, TaskState};
 use crate::drivers::timer::pit;
-use crate::tasks::init::idle_task
+use crate::tasks::pid::alloc_pid;
+use crate::tasks::init::idle_task;
 
 extern "C" {
     fn context_switch(old: *mut u64, new: *const u64);

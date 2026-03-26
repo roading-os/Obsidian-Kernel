@@ -3,6 +3,11 @@ pub mod gdt;
 pub mod pic;
 pub mod idt;
 pub mod interrupts;
+pub mod tss;
+
+extern "C" {
+    fn syscall_entry();
+}
 
 pub fn init() {
     gdt::init();
