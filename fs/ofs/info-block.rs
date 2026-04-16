@@ -90,6 +90,7 @@ impl Language {
             "mojo" => Some(Self::Mojo),
             "cpp" | "cc" | "cxx" => Some(Self::Cpp),
             "cs" => Some(Self::Csharp),
+            _ => None,
             // if necessary, put more languages
             // "" => Some(Self::),
             // "" => Some(Self::),
@@ -140,6 +141,7 @@ impl CommonInfo {
     }
 }
 
+/* correct this after.
 let mut info = CommonInfo {
     name: "main.rs".into(),
     block_pointer: 42,
@@ -163,7 +165,7 @@ let mut info = CommonInfo {
 info.detect_language();
 
 println!("{:?}", info.language); // Some(Rust)
-
+*/
 #[derive(Debug, Clone)]
 pub enum InfoBlock {
     File(CommonInfo),

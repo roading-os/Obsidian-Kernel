@@ -85,6 +85,7 @@ pub fn init() {
             "push rax",
             "1retq",
             "2:",
+            ltr ax,
             out("rax") _,
         );
     }

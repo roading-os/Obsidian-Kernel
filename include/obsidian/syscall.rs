@@ -81,12 +81,8 @@ fn sys_write(regs: &SyscallRegs) -> i64 {
 //
 
 fn sys_create_process(regs: &SyscallRegs) -> i64 {
-    let entry = regs.rdi;
-
-    match tasks::create_process(entry) {
-        Ok(pid) => pid as i64,
-        Err(_) => -ENOMEM as i64,
-    }
+   // placeholder until ELF loader
+   -EINVAL as i64
 }
 
 fn sys_start_process(regs: &SyscallRegs) -> i64 {

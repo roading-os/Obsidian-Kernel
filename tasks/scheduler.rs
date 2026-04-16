@@ -13,15 +13,7 @@ const STACK_SIZE: u64 = 4096;
 fn allocate_stack() -> u64 {
     use crate::arch::x86_64::memory::frame_alloc;
 
-    let mut base: u64 = 0;
-
-    for i in 0..4 {
-        let frame = frame_alloc::alloc_frame().expect("no memory");
-
-        if i == 0 {
-            base = frame;
-        }
-    }
+    let base = frame_alloc::alloc_frame().expect("no memory");
 
     base
 }
@@ -82,7 +74,11 @@ pub fn schedule() {
             return;
         }
 
-        let old_task = TASKS[old].as_mut().unwrap();
+        let old_task = match TASKS[old].as_mut() {
+            Some(t) => t,
+            None => return,
+        };
+
         let new_task = TASKS[CURRENT].as_ref().unwrap();
 
         old_task.state = TaskState::Ready;

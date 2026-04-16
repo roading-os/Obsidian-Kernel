@@ -9,9 +9,6 @@ use crate::kernel::logger;
 use crate::memory::map::MemoryRegionType;
 use crate::arch::x86_64::memory::{frame_alloc, paging};
 
-frame_alloc::init(&memory_map);
-paging::init();
-
 pub fn init(mb_addr: usize) {
     logger::info("Inicializando subsistema de memória");
 
@@ -42,6 +39,7 @@ pub fn init(mb_addr: usize) {
     logger::info("Mapa de memória parseado");
 
     // Initalize physic frame allocator
+    frame_alloc::init(&memory_map);
      logger::info("Frame allocator inicializado");
 
     // Initializes paging (needed to map kernel + heap)

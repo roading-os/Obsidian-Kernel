@@ -77,13 +77,9 @@ extern "x86-interrupt" fn breakpoint(_stack: InterruptStackFrame) {
 extern "x86-interrupt" fn syscall_handler(_stack: InterruptStackFrame) {
     use crate::include::obsidian::{types::SyscallRegs, syscall::handle_syscall};
 
-    // TODO: later we can actually read registers from userland
-    let regs = SyscallRegs {
-        rax: 0, rbx: 0, rcx: 0, rdx: 0,
-        rsi: 0, rdi: 0,
-        r8: 0, r9: 0, r10: 0, r11: 0,
-        r12: 0, r13: 0, r14: 0, r15: 0,
-    };
+    pub extern "C" fn syscall_dispatch(regs: &mut SyscallRegs) -> u64 {
+       handle_syscall(regs.rax, regs) as u64
+    }
 
     handle_syscall(regs.rax, &regs);
 }
@@ -94,13 +90,13 @@ extern "x86-interrupt" fn syscall_handler(_stack: InterruptStackFrame) {
 pub fn init() {
     unsafe {
         // CPU exceptions
-        IDT[0].set_handler_addr(divide_by_zero as u64); // #DE Divide-by-zero
-        IDT[3].set_handler_addr(breakpoint as u64);     // #BP Breakpoint
+        IDT[0].set_handler_addr(divide_by_zero as u64, false); // #DE Divide-by-zero
+        IDT[3].set_handler_addr(breakpoint as u64, false);     // #BP Breakpoint
 
-        IDT[32].set_handler_addr(timer_interrupt as u64); // PIT
+        IDT[32].set_handler_addr(timer_interrupt as u64, false); // PIT
 
         // Syscall interrupt
-        IDT[0x80].set_handler_addr(syscall_entry as u64); // interrupt 0x80 for syscalls
+        IDT[0x80].set_handler_addr(syscall_entry as u64, true); // interrupt 0x80 for syscalls
 
         // Load IDT
         let idt_ptr = IdtPointer {
