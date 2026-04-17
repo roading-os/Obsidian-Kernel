@@ -1,0 +1,9 @@
+target/
+.git/
+build/
+.github/
+*.md
+*.toml
+*.yml
+*.yaml
+*.json
