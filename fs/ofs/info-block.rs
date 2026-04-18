@@ -62,7 +62,7 @@ pub struct Timestamps {
 
 #[derive(Debug, Clone)]
 pub enum MediaSource {
-    Device(String), // "Nokia Lumia 1020"
+    Device(String), // "Nokia Lumia 1020", "Canon EOS 5D Mark IV", qualquer dispositivo de câmera ou dispositivo com câmera integrada
     Unknown,
 }
 
