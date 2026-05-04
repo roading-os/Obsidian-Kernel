@@ -5,7 +5,7 @@ use core::mem::size_of;
 #[repr(C, packed)]
 pub struct Tss {
     _reserved1: u32,
-    pub rsp: [u64; 3], // RSP0, RSP1, RSP2
+    pub rsp: [u64; 3],
     _reserved2: u64,
     pub ist: [u64; 7],
     _reserved3: u64,
@@ -30,9 +30,10 @@ impl Tss {
 static mut TSS: Tss = Tss::new();
 
 pub unsafe fn init(stack_top: u64) {
-    TSS.rsp[0] = stack_top; // 🔥 RSP0 = stack do kernel
+    let rsp0 = (core::ptr::addr_of_mut!(TSS) as *mut u8).add(4) as *mut u64;
+    core::ptr::write_unaligned(rsp0, stack_top);
 }
 
 pub fn get_tss_ptr() -> u64 {
-    unsafe { &TSS as *const _ as u64 }
+    core::ptr::addr_of!(TSS) as *const _ as u64
 }

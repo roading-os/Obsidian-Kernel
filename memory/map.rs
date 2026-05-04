@@ -39,22 +39,29 @@ pub struct MemoryMap {
     pub regions: &'static [MemoryRegion],
 }
 
+const MAX_MEMORY_REGIONS: usize = 128;
+
 pub unsafe fn from_multiboot(multiboot_addr: usize) -> MemoryMap {
-    static mut REGIONS: [MemoryRegion; 128] = [MemoryRegion {
+    static mut REGIONS: [MemoryRegion; MAX_MEMORY_REGIONS] = [MemoryRegion {
         start: 0,
         end: 0,
         region_type: MemoryRegionType::Reserved,
-    }; 128];
+    }; MAX_MEMORY_REGIONS];
 
     let mut count = 0;
 
     parse_memory_map(multiboot_addr, |region| {
-        REGIONS[count] = region;
-        count += 1;
+        if count < MAX_MEMORY_REGIONS {
+            REGIONS[count] = region;
+            count += 1;
+        }
     });
 
     MemoryMap {
-        regions: &REGIONS[..count],
+        regions: core::slice::from_raw_parts(
+            core::ptr::addr_of!(REGIONS) as *const MemoryRegion,
+            count,
+        ),
     }
 }
 

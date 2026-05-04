@@ -2,5 +2,7 @@
 target/
 .vscode/
 .idea/
+.vs
+.vs/
 *.log
 *.tmp

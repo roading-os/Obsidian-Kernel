@@ -11,10 +11,11 @@
 /*-----------------------------
   Multiboot2 Header
 -----------------------------*/
+multiboot_header:
 .long 0xe85250d6                 /* Multiboot2 magic */
 .long 0                          /* Architecture (0 = i386, required even for x86_64) */
-.long header_end - header_start  /* Total header length */
-.long -(0xe85250d6 + 0 + (header_end - header_start)) /* Checksum */
+.long header_end - multiboot_header  /* Total header length */
+.long -(0xe85250d6 + 0 + (header_end - multiboot_header)) /* Checksum */
 
 header_start:
 

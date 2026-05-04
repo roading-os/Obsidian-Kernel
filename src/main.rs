@@ -8,11 +8,18 @@ kernel/ and memory/ */
 
 extern crate alloc;
 
+#[path = "../arch/mod.rs"]
 mod arch;
+#[path = "../drivers/mod.rs"]
 mod drivers;
+#[path = "../kernel/mod.rs"]
 mod kernel;
+#[path = "../memory/mod.rs"]
 mod memory;
+#[path = "../include/mod.rs"]
 mod include;
+#[path = "../tasks/mod.rs"]
+mod tasks;
 
 use core::panic::PanicInfo;
 

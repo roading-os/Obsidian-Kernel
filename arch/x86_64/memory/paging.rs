@@ -3,6 +3,7 @@ use crate::arch::x86_64::memory::frame_alloc;
 use core::arch::asm;
 
 const PAGE_SIZE: u64 = 4096;
+const PAGE_SIZE_USIZE: usize = PAGE_SIZE as usize;
 const ENTRY_COUNT: usize = 512;
 
 const PRESENT: u64 = 1 << 0;
@@ -95,9 +96,9 @@ pub fn map_kernel_heap(size: usize) -> usize {
     const HEAP_START: u64 = 0xffff_ffff_9000_0000;
 
     unsafe {
-      for offset in (0..size).step_by(PAGE_SIZE) {
+      for offset in (0..size).step_by(PAGE_SIZE_USIZE) {
          let frame = frame_alloc::alloc_frame().unwrap();
-         map_page(HEAP_START + offset, frame, PRESENT | WRITABLE);
+         map_page(HEAP_START + offset as u64, frame, PRESENT | WRITABLE);
       }
         
     }

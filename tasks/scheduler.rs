@@ -1,6 +1,5 @@
 // tasks/scheduler.rs
 use crate::tasks::task::{Task, TaskState};
-use crate::drivers::timer::pit;
 use crate::tasks::pid::alloc_pid;
 use crate::tasks::init::idle_task;
 
@@ -9,6 +8,7 @@ extern "C" {
 }
 
 const STACK_SIZE: u64 = 4096;
+const MAX_TASKS: usize = 64;
 
 fn allocate_stack() -> u64 {
     use crate::arch::x86_64::memory::frame_alloc;
@@ -18,7 +18,7 @@ fn allocate_stack() -> u64 {
     base
 }
 
-static mut TASKS: [Option<Task>; 64] = [None; 64];
+static mut TASKS: [Option<Task>; MAX_TASKS] = [None; MAX_TASKS];
 static mut CURRENT: usize = 0;
 
 pub fn init() {
@@ -30,11 +30,15 @@ pub fn create(entry: fn()) -> Task {
     let stack = allocate_stack();
 
     let stack_top = stack + STACK_SIZE;
-
-    let rsp = stack_top - 8;
+    let rsp = stack_top - 7 * 8;
 
     unsafe {
-        *(rsp as *mut u64) = entry as u64;
+        let frame = rsp as *mut u64;
+        // context_switch pops six callee-saved registers and then returns.
+        for i in 0..6 {
+            *frame.add(i) = 0;
+        }
+        *frame.add(6) = entry as u64;
     }
 
     Task {
@@ -46,11 +50,14 @@ pub fn create(entry: fn()) -> Task {
 
 pub fn add(task: Task) {
     unsafe {
-        for slot in TASKS.iter_mut() {
-            if slot.is_none() {
-                *slot = Some(task);
+        let mut i = 0;
+        while i < MAX_TASKS {
+            if TASKS[i].is_none() {
+                TASKS[i] = Some(task);
                 return;
             }
+
+            i += 1;
         }
     }
 }
@@ -60,8 +67,8 @@ pub fn schedule() {
         let old = CURRENT;
 
         // encontrar próxima task READY
-        for _ in 0..TASKS.len() {
-            CURRENT = (CURRENT + 1) % TASKS.len();
+        for _ in 0..MAX_TASKS {
+            CURRENT = (CURRENT + 1) % MAX_TASKS;
 
             if let Some(ref task) = TASKS[CURRENT] {
                 if task.state == TaskState::Ready {
@@ -74,20 +81,23 @@ pub fn schedule() {
             return;
         }
 
-        let old_task = match TASKS[old].as_mut() {
-            Some(t) => t,
+        let old_rsp = match TASKS[old].as_mut() {
+            Some(t) => {
+                t.state = TaskState::Ready;
+                &mut t.rsp as *mut u64
+            }
             None => return,
         };
 
-        let new_task = TASKS[CURRENT].as_ref().unwrap();
-
-        old_task.state = TaskState::Ready;
-        new_task.state = TaskState::Running;
+        let new_rsp = match TASKS[CURRENT].as_mut() {
+            Some(t) => {
+                t.state = TaskState::Running;
+                &t.rsp as *const u64
+            }
+            None => return,
+        };
 
         // troca de contexto
-        context_switch(
-            &mut old_task.rsp,
-            &new_task.rsp
-        );
+        context_switch(old_rsp, new_rsp);
     }
 }

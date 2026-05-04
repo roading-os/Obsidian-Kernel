@@ -19,7 +19,8 @@ SECTIONS
        Multiboot2 header
        Must be early in the binary for GRUB to find it
     -------------------------------------------------- */
-    .multiboot ALIGN(8) : {
+    .multiboot2 ALIGN(8) : {
+        KEEP(*(.multiboot2))
         KEEP(*(.multiboot))
     }
 

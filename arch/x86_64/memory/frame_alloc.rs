@@ -4,9 +4,10 @@ use crate::memory::map::MemoryRegionType;
 use crate::memory::map::MemoryMap;
 
 const FRAME_SIZE: u64 = 4096;
+const BITMAP_BYTES: usize = 1024 * 1024;
 
 // Bitmap simples: 1 bit por frame
-static mut BITMAP: [u8; 1024 * 1024] = [0; 1024 * 1024]; 
+static mut BITMAP: [u8; BITMAP_BYTES] = [0; BITMAP_BYTES];
 // → suporta até ~32 GiB (1M bytes * 8 bits * 4KiB)
 
 static TOTAL_FRAMES: AtomicUsize = AtomicUsize::new(0);
@@ -34,7 +35,7 @@ fn is_frame_free(frame: usize) -> bool {
 
 pub fn init(memory_map: &MemoryMap) {
     // 1️⃣ Marca tudo como usado
-    let max_frames = unsafe { BITMAP.len() * 8};
+    let max_frames = BITMAP_BYTES * 8;
     TOTAL_FRAMES.store(max_frames, Ordering::Relaxed);
 
     for i in 0..max_frames {
@@ -43,7 +44,6 @@ pub fn init(memory_map: &MemoryMap) {
 
     // 2️⃣ Libera apenas regiões Usable
     for region in memory_map.regions {
-        reserve_region(0x0, 0x200000)
         if region.region_type != MemoryRegionType::Usable {
             continue;
         }
@@ -56,6 +56,18 @@ pub fn init(memory_map: &MemoryMap) {
                 set_frame_free(frame);
             }
         }
+    }
+
+    reserve_region(0x0, 0x200000);
+}
+
+fn reserve_region(start: usize, end: usize) {
+    let start_frame = start / FRAME_SIZE as usize;
+    let end_frame = end.div_ceil(FRAME_SIZE as usize);
+    let max_frames = TOTAL_FRAMES.load(Ordering::Relaxed);
+
+    for frame in start_frame..end_frame.min(max_frames) {
+        set_frame_used(frame);
     }
 }
 

@@ -2,7 +2,7 @@
 pub mod init;
 pub mod logger;
 pub mod panic;
-pub mod state;
+pub mod syscall;
 
 pub fn init() {
     logger::init();

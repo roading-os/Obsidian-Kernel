@@ -76,17 +76,11 @@ pub fn init() {
 
         // Reload segment registers
         asm!(
-            "mov ax, 0x10",
             "mov ds, ax",
             "mov es, ax",
             "mov ss, ax",
-            "pushq $0x08",
-            "lea rax, [rip + 1f]",
-            "push rax",
-            "1retq",
-            "2:",
-            ltr ax,
-            out("rax") _,
+            in("ax") 0x10u16,
+            options(nostack, preserves_flags),
         );
     }
 }
@@ -94,9 +88,7 @@ pub fn init() {
 static mut KERNEL_STACK: [u8; 4096 * 4] = [0; 4096 * 4];
 
 fn kernel_stack_top() -> u64 {
-    unsafe {
-        &KERNEL_STACK as *const _ as u64 + (4096 * 4) as u64
-    }
+    core::ptr::addr_of!(KERNEL_STACK) as *const _ as u64 + (4096 * 4) as u64
 }
 
 fn create_tss_descriptor(base: u64, limit: u32) -> TssDescriptor {

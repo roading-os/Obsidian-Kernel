@@ -1,9 +1,5 @@
 // memory/heap.rs
-use core::alloc::{GlobalAlloc, Layout};
-
-#![feature(alloc_error_handler)]
-
-use core::ptr::null_mut;
+use core::alloc::Layout;
 use linked_list_allocator::LockedHeap;
 
 #[global_allocator]
@@ -19,6 +15,7 @@ pub unsafe fn init_heap(heap_start: usize, heap_size: usize) {
 }
 
 /// Fallback if trying to allocate before the heap exists
+#[alloc_error_handler]
 fn alloc_error(layout: Layout) -> ! {
     panic!(
         "Failed to allocate memory: size={}, alignment={}",

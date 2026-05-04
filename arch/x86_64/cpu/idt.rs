@@ -1,6 +1,5 @@
 // arch/x86_64/cpu/idt.rs
 #![allow(dead_code)]
-#![feature(abi_x86_interrupt)]
 
 use core::arch::asm;
 use x86_64::structures::idt::InterruptStackFrame;
@@ -72,19 +71,6 @@ extern "x86-interrupt" fn breakpoint(_stack: InterruptStackFrame) {
 }
 
 // -------------------------------
-// Syscall handler (interrupt 0x80)
-// -------------------------------
-extern "x86-interrupt" fn syscall_handler(_stack: InterruptStackFrame) {
-    use crate::include::obsidian::{types::SyscallRegs, syscall::handle_syscall};
-
-    pub extern "C" fn syscall_dispatch(regs: &mut SyscallRegs) -> u64 {
-       handle_syscall(regs.rax, regs) as u64
-    }
-
-    handle_syscall(regs.rax, &regs);
-}
-
-// -------------------------------
 // Initialize IDT and enable interrupts
 // -------------------------------
 pub fn init() {
@@ -101,7 +87,7 @@ pub fn init() {
         // Load IDT
         let idt_ptr = IdtPointer {
             limit: (core::mem::size_of::<[IdtEntry; 256]>() - 1) as u16,
-            base: &IDT as *const _ as u64,
+            base: core::ptr::addr_of!(IDT) as *const _ as u64,
         };
 
         asm!("lidt [{}]", in(reg) &idt_ptr);
